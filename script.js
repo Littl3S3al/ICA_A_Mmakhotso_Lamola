@@ -1,5 +1,8 @@
 import * as THREE from 'https://threejsfundamentals.org/threejs/resources/threejs/r119/build/three.module.js';
 import {OrbitControls} from 'https://threejsfundamentals.org/threejs/resources/threejs/r119/examples/jsm/controls/OrbitControls.js';
+import { Sky } from 'https://threejsfundamentals.org/threejs/resources/threejs/r119/examples/jsm/objects/Sky.js';
+import { GUI } from 'https://threejsfundamentals.org/threejs/resources/threejs/r119/examples/jsm/libs/dat.gui.module.js';
+
 
 // variables for event listeners
 const beginBtn = document.querySelector('#btn-begin');
@@ -16,9 +19,36 @@ const main  = () => {
     camera.position.set( 400, 200, 0 );
 
     const scene = new THREE.Scene();
-    scene.background = new THREE.Color( 0xcccccc );
-    scene.fog = new THREE.FogExp2( 0xcccccc, 0.002 );
+    scene.background = new THREE.Color( 0xC5CAE9  );
+    // scene.fog = new THREE.FogExp2( 0xF48FB1  , 0.002 );
 
+    // sky
+    const sky = new Sky();
+    sky.scale.setScalar( 450000 );
+    scene.add( sky );
+
+    const sun = new THREE.Vector3();
+
+    const theta = Math.PI * ( 0.47 - 0.5 );
+    const phi = 2 * Math.PI * ( 0.3 - 0.5 );
+    sun.x = Math.cos( phi );
+    sun.y = Math.sin( phi ) * Math.sin( theta );
+    sun.z = Math.sin( phi ) * Math.cos( theta );
+
+    const uniforms = sky.material.uniforms;
+    uniforms[ "turbidity" ].value = 15;
+    uniforms[ "rayleigh" ].value = 3;
+    uniforms[ "mieCoefficient" ].value = 0.005;
+    uniforms[ "mieDirectionalG" ].value = 0.7;
+    uniforms[ "sunPosition" ].value.copy( sun );
+
+    renderer.render( scene, camera );
+
+
+
+    
+
+    
     // orbit controls
     const controls = new OrbitControls( camera, canvas );
     // controls.addEventListener( 'change', render );
@@ -29,20 +59,7 @@ const main  = () => {
     controls.maxDistance = 500;
     controls.maxPolarAngle = Math.PI / 2;
 
-    {
-        const color = 0xFFFFFF;
-        const intensity = 1;
-        const light = new THREE.DirectionalLight(color, intensity);
-        light.position.set(1, 1, 1);
-        scene.add(light);
-
-        var light2 = new THREE.DirectionalLight( 0x002288 );
-        light.position.set( - 1, - 1, - 1 );
-        scene.add( light2 );
-
-        const ambientLight = new THREE.AmbientLight( 0x222222 );
-        scene.add( ambientLight );
-    }
+    
 
     // set up world
     const geometry = new THREE.CylinderBufferGeometry( 0, 10, 30, 4, 1 );
@@ -80,6 +97,10 @@ const main  = () => {
         camera.aspect = canvas.clientWidth / canvas.clientHeight;
         camera.updateProjectionMatrix();
         }
+
+        renderer.outputEncoding = THREE.sRGBEncoding;
+        renderer.toneMapping = THREE.ACESFilmicToneMapping;
+        renderer.toneMappingExposure = 0.5;
 
         requestAnimationFrame(render);
         controls.update();  
