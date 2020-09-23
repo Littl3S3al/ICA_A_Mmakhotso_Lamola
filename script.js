@@ -7,6 +7,7 @@ import { GUI } from 'https://threejsfundamentals.org/threejs/resources/threejs/r
 // variables for event listeners
 const beginBtn = document.querySelector('#btn-begin');
 const overlay = document.querySelector('#overlay');
+const threeJsWindow = document.querySelector('#three-js-container');
 const popupWindow = document.querySelector('.popup-window');
 const closeBtn = document.querySelector('#btn-close');
 
@@ -15,12 +16,29 @@ const main  = () => {
     const canvas = document.querySelector('#c');
     const renderer = new THREE.WebGLRenderer({canvas});
 
-    const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 1, 1000);
-    camera.position.set( 400, 200, 0 );
+    const camera = new THREE.PerspectiveCamera(100, window.innerWidth / window.innerHeight, 1, 1000);
+    camera.position.x = 1000000000000;
+    camera.position.y = -10;
+    camera.position.z = 0;
+
+    const cameraPostions = [
+
+    ];
+    let trackStep = 0;
+    const forwardBtn = document.querySelector('.btn-forward');
+    const backwardBtn = document.querySelector('.btn-backwards');
+
+    forwardBtn.addEventListener('click', () => {
+
+    })
+
+    backwardBtn.addEventListener('click', () => {
+
+
+    })
 
     const scene = new THREE.Scene();
-    scene.background = new THREE.Color( 0xC5CAE9  );
-    // scene.fog = new THREE.FogExp2( 0xF48FB1  , 0.002 );
+    scene.fog = new THREE.FogExp2( 0xF48FB1  , 0.001 );
 
     // sky
     const sky = new Sky();
@@ -38,13 +56,25 @@ const main  = () => {
     const uniforms = sky.material.uniforms;
     uniforms[ "turbidity" ].value = 15;
     uniforms[ "rayleigh" ].value = 3;
-    uniforms[ "mieCoefficient" ].value = 0.005;
+    uniforms[ "mieCoefficient" ].value = 0;
     uniforms[ "mieDirectionalG" ].value = 0.7;
     uniforms[ "sunPosition" ].value.copy( sun );
 
     renderer.render( scene, camera );
 
 
+    {
+        const color = 0xFFFFFF;
+        const intensity = 1;
+        const light = new THREE.DirectionalLight(color, intensity);
+        light.position.set(-1, 2, 4);
+        scene.add(light);
+      }
+
+      {
+        const light = new THREE.AmbientLight(0xFFFFFF, 0.5);
+        scene.add(light);
+      }
 
     
 
@@ -56,8 +86,8 @@ const main  = () => {
     controls.dampingFactor = 0.05;
     controls.screenSpacePanning = false;
     controls.minDistance = 100;
-    controls.maxDistance = 500;
-    controls.maxPolarAngle = Math.PI / 2;
+    controls.maxDistance = 200;
+    controls.maxPolarAngle = Math.PI / 0.1;
 
     
 
@@ -65,15 +95,21 @@ const main  = () => {
     const geometry = new THREE.CylinderBufferGeometry( 0, 10, 30, 4, 1 );
     const material = new THREE.MeshPhongMaterial( { color: 0xffffff, flatShading: true } );
 
+
+    const CenterOrb = new THREE.Mesh (geometry, material)
+    CenterOrb.position.x = -600;
+    CenterOrb.position.y = 0;
+    scene.add( CenterOrb );
+
     for ( var i = 0; i < 500; i ++ ) {
 
         var mesh = new THREE.Mesh( geometry, material );
         mesh.position.x = Math.random() * 1600 - 800;
-        mesh.position.y = 0;
+        mesh.position.y = 30;
         mesh.position.z = Math.random() * 1600 - 800;
         mesh.updateMatrix();
         mesh.matrixAutoUpdate = false;
-        scene.add( mesh );
+        CenterOrb.add( mesh );
 
     }
    
@@ -90,7 +126,11 @@ const main  = () => {
         return needResize;
     }
 
-    const render = () => {
+
+
+    const render = (time) => {
+
+        time *= 0.0001;
 
         if (resizeRendererToDisplaySize(renderer)) {
         const canvas = renderer.domElement;
@@ -98,9 +138,11 @@ const main  = () => {
         camera.updateProjectionMatrix();
         }
 
+        CenterOrb.rotation.y = time;
+
         renderer.outputEncoding = THREE.sRGBEncoding;
         renderer.toneMapping = THREE.ACESFilmicToneMapping;
-        renderer.toneMappingExposure = 0.5;
+        renderer.toneMappingExposure = 0.2;
 
         requestAnimationFrame(render);
         controls.update();  
@@ -118,6 +160,7 @@ const main  = () => {
 // event listeners
 beginBtn.addEventListener('click', () => {
     overlay.style.display = 'none';
+    threeJsWindow.style.display = 'block';
     main();
 });
 
