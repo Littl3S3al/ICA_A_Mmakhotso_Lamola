@@ -12,14 +12,12 @@ const main  = () => {
     const canvas = document.querySelector('#c');
     const renderer = new THREE.WebGLRenderer({canvas});
 
-    const fov = 75;
-    const aspect = 2;  // the canvas default
-    const near = 0.1;
-    const far = 5;
-    const camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
-    camera.position.z = 2;
+    const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 1, 1000);
+    camera.position.set( 400, 200, 0 );
 
     const scene = new THREE.Scene();
+    scene.background = new THREE.Color( 0xcccccc );
+    scene.fog = new THREE.FogExp2( 0xcccccc, 0.002 );
 
     // orbit controls
     const controls = new OrbitControls( camera, canvas );
@@ -35,31 +33,34 @@ const main  = () => {
         const color = 0xFFFFFF;
         const intensity = 1;
         const light = new THREE.DirectionalLight(color, intensity);
-        light.position.set(-1, 2, 4);
+        light.position.set(1, 1, 1);
         scene.add(light);
+
+        var light2 = new THREE.DirectionalLight( 0x002288 );
+        light.position.set( - 1, - 1, - 1 );
+        scene.add( light2 );
+
+        const ambientLight = new THREE.AmbientLight( 0x222222 );
+        scene.add( ambientLight );
     }
 
-    const boxWidth = 1;
-    const boxHeight = 1;
-    const boxDepth = 1;
-    const geometry = new THREE.BoxGeometry(boxWidth, boxHeight, boxDepth);
+    // set up world
+    const geometry = new THREE.CylinderBufferGeometry( 0, 10, 30, 4, 1 );
+    const material = new THREE.MeshPhongMaterial( { color: 0xffffff, flatShading: true } );
 
-    const makeInstance = (geometry, color, x) => {
-        const material = new THREE.MeshPhongMaterial({color});
+    for ( var i = 0; i < 500; i ++ ) {
 
-        const cube = new THREE.Mesh(geometry, material);
-        scene.add(cube);
+        var mesh = new THREE.Mesh( geometry, material );
+        mesh.position.x = Math.random() * 1600 - 800;
+        mesh.position.y = 0;
+        mesh.position.z = Math.random() * 1600 - 800;
+        mesh.updateMatrix();
+        mesh.matrixAutoUpdate = false;
+        scene.add( mesh );
 
-        cube.position.x = x;
-
-        return cube;
     }
+   
 
-    const cubes = [
-        makeInstance(geometry, 0x44aa88,  0),
-        makeInstance(geometry, 0x8844aa, -2),
-        makeInstance(geometry, 0xaa8844,  2),
-    ];
 
     const resizeRendererToDisplaySize = (renderer) => {
         const canvas = renderer.domElement;
@@ -72,8 +73,7 @@ const main  = () => {
         return needResize;
     }
 
-    const render = (time) => {
-        time *= 0.001;
+    const render = () => {
 
         if (resizeRendererToDisplaySize(renderer)) {
         const canvas = renderer.domElement;
@@ -81,19 +81,16 @@ const main  = () => {
         camera.updateProjectionMatrix();
         }
 
-        cubes.forEach((cube, ndx) => {
-        const speed = 1 + ndx * .1;
-        const rot = time * speed;
-        cube.rotation.x = rot;
-        cube.rotation.y = rot;
-        });
+        requestAnimationFrame(render);
+        controls.update();  
 
         renderer.render(scene, camera);
 
-        requestAnimationFrame(render);
+        
     }
 
     requestAnimationFrame(render);
+    controls.update();
 }
 
 
