@@ -16,26 +16,11 @@ const main  = () => {
     const canvas = document.querySelector('#c');
     const renderer = new THREE.WebGLRenderer({canvas});
 
-    const camera = new THREE.PerspectiveCamera(100, window.innerWidth / window.innerHeight, 1, 1000);
-    camera.position.x = 1000000000000;
+    const camera = new THREE.PerspectiveCamera(100, window.innerWidth / window.innerHeight, 1, 10000);
+    camera.position.x = 110;
     camera.position.y = -10;
     camera.position.z = 0;
 
-    const cameraPostions = [
-
-    ];
-    let trackStep = 0;
-    const forwardBtn = document.querySelector('.btn-forward');
-    const backwardBtn = document.querySelector('.btn-backwards');
-
-    forwardBtn.addEventListener('click', () => {
-
-    })
-
-    backwardBtn.addEventListener('click', () => {
-
-
-    })
 
     const scene = new THREE.Scene();
     scene.fog = new THREE.FogExp2( 0xF48FB1  , 0.001 );
@@ -72,7 +57,7 @@ const main  = () => {
       }
 
       {
-        const light = new THREE.AmbientLight(0xFFFFFF, 0.5);
+        const light = new THREE.AmbientLight(0xFFFFFF, 1);
         scene.add(light);
       }
 
@@ -99,14 +84,17 @@ const main  = () => {
     const CenterOrb = new THREE.Mesh (geometry, material)
     CenterOrb.position.x = -600;
     CenterOrb.position.y = 0;
+    CenterOrb.rotation.y = 0;
     scene.add( CenterOrb );
 
-    for ( var i = 0; i < 500; i ++ ) {
-
+    for ( var i = 0; i < 4; i ++ ) {
+        let pos = [
+            {x: 0, z: 550}, {x: -550, z: 0}, {x: 0, z: -550}, {x: 550, z: 0}
+        ]
         var mesh = new THREE.Mesh( geometry, material );
-        mesh.position.x = Math.random() * 1600 - 800;
+        mesh.position.x = pos[i].x;
         mesh.position.y = 30;
-        mesh.position.z = Math.random() * 1600 - 800;
+        mesh.position.z = pos[i].z;
         mesh.updateMatrix();
         mesh.matrixAutoUpdate = false;
         CenterOrb.add( mesh );
@@ -126,11 +114,32 @@ const main  = () => {
         return needResize;
     }
 
+    const forwardBtn = document.querySelector('.btn-forward');
+    const backwardBtn = document.querySelector('.btn-backwards');
+    let postionY = 0;
 
+    forwardBtn.addEventListener('mousedown', () => {
+        postionY = 0.001;
+    })
+    forwardBtn.addEventListener('mouseup', () => {
+        postionY = null;
+    })
+
+    backwardBtn.addEventListener('mousedown', () => {
+        postionY = -0.001;
+
+    })
+    backwardBtn.addEventListener('mouseup', () => {
+        postionY = null;
+
+    })
+    let value = 0.001;
 
     const render = (time) => {
-
-        time *= 0.0001;
+        
+        if(postionY){
+            value = time * postionY;
+        }
 
         if (resizeRendererToDisplaySize(renderer)) {
         const canvas = renderer.domElement;
@@ -138,7 +147,7 @@ const main  = () => {
         camera.updateProjectionMatrix();
         }
 
-        CenterOrb.rotation.y = time;
+        CenterOrb.rotation.y = value;
 
         renderer.outputEncoding = THREE.sRGBEncoding;
         renderer.toneMapping = THREE.ACESFilmicToneMapping;
