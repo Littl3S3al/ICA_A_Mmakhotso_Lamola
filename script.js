@@ -16,18 +16,18 @@ const main  = () => {
     const canvas = document.querySelector('#c');
     const renderer = new THREE.WebGLRenderer({canvas});
 
-    const camera = new THREE.PerspectiveCamera(100, window.innerWidth / window.innerHeight, 1, 10000);
+    const camera = new THREE.PerspectiveCamera(100, window.innerWidth / window.innerHeight, 1, 1000);
     camera.position.x = 110;
     camera.position.y = -10;
     camera.position.z = 0;
 
 
     const scene = new THREE.Scene();
-    scene.fog = new THREE.FogExp2( 0xF48FB1  , 0.001 );
+    scene.fog = new THREE.FogExp2( 0xF48FB1  , 0.002 );
 
     // sky
     const sky = new Sky();
-    sky.scale.setScalar( 450000 );
+    sky.scale.setScalar( 1000 );
     scene.add( sky );
 
     const sun = new THREE.Vector3();
@@ -71,8 +71,13 @@ const main  = () => {
     controls.dampingFactor = 0.05;
     controls.screenSpacePanning = false;
     controls.minDistance = 100;
-    controls.maxDistance = 200;
-    controls.maxPolarAngle = Math.PI / 0.1;
+    controls.maxDistance = 500;
+    controls.maxPolarAngle = Math.PI / 0.2;
+    // controls.enableZoom = false;
+    controls.maxPolarAngle = Math.PI*0.4;
+
+    
+      
 
     
 
@@ -82,18 +87,18 @@ const main  = () => {
 
 
     const CenterOrb = new THREE.Mesh (geometry, material)
-    CenterOrb.position.x = -600;
+    CenterOrb.position.x = -200;
     CenterOrb.position.y = 0;
     CenterOrb.rotation.y = 0;
     scene.add( CenterOrb );
 
     for ( var i = 0; i < 4; i ++ ) {
         let pos = [
-            {x: 0, z: 550}, {x: -550, z: 0}, {x: 0, z: -550}, {x: 550, z: 0}
+            {x: 0, z: 200}, {x: -200, z: 0}, {x: 0, z: -200}, {x: 200, z: 0}
         ]
         var mesh = new THREE.Mesh( geometry, material );
         mesh.position.x = pos[i].x;
-        mesh.position.y = 30;
+        mesh.position.y = 10;
         mesh.position.z = pos[i].z;
         mesh.updateMatrix();
         mesh.matrixAutoUpdate = false;
@@ -102,6 +107,32 @@ const main  = () => {
     }
    
 
+    // set up maps
+
+    const createMap = (image, yPos) => {
+        const planeSize = 600;
+
+        const loader = new THREE.TextureLoader();
+        const texture = loader.load(image);
+        texture.magFilter = THREE.NearestFilter;
+
+        const planeGeo = new THREE.PlaneBufferGeometry(planeSize, planeSize);
+        const planeMat = new THREE.MeshPhongMaterial({
+            map: texture,
+            transparent: true,
+            alphaTest: 0
+        });
+        const mapMesh = new THREE.Mesh(planeGeo, planeMat);
+        mapMesh.rotation.x = Math.PI * -.5;
+        mapMesh.position.y = yPos;
+        planeMat.opacity = 0.2;
+        CenterOrb.add(mapMesh);
+    }
+    
+    createMap('assets/map_1.png', -20);
+    createMap('assets/map_3.png', -25);
+    createMap('assets/map_4.png', -30);
+    
 
     const resizeRendererToDisplaySize = (renderer) => {
         const canvas = renderer.domElement;
@@ -114,32 +145,9 @@ const main  = () => {
         return needResize;
     }
 
-    const forwardBtn = document.querySelector('.btn-forward');
-    const backwardBtn = document.querySelector('.btn-backwards');
-    let postionY = 0;
-
-    forwardBtn.addEventListener('mousedown', () => {
-        postionY = 0.001;
-    })
-    forwardBtn.addEventListener('mouseup', () => {
-        postionY = null;
-    })
-
-    backwardBtn.addEventListener('mousedown', () => {
-        postionY = -0.001;
-
-    })
-    backwardBtn.addEventListener('mouseup', () => {
-        postionY = null;
-
-    })
-    let value = 0.001;
-
     const render = (time) => {
-        
-        if(postionY){
-            value = time * postionY;
-        }
+
+        time *= 0.00007;
 
         if (resizeRendererToDisplaySize(renderer)) {
         const canvas = renderer.domElement;
@@ -147,7 +155,7 @@ const main  = () => {
         camera.updateProjectionMatrix();
         }
 
-        CenterOrb.rotation.y = value;
+        CenterOrb.rotation.y = time;
 
         renderer.outputEncoding = THREE.sRGBEncoding;
         renderer.toneMapping = THREE.ACESFilmicToneMapping;

@@ -32,12 +32,6 @@ body {
   height: 100vh;
   z-index: 1;
 }
-#three-js-container .btn-position {
-  position: fixed;
-  bottom: 10px;
-  right: 10px;
-  z-index: 2;
-}
 
 .popup-window {
   background: black;
