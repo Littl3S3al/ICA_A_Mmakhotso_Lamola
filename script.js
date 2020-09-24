@@ -72,8 +72,6 @@ const main  = () => {
     controls.screenSpacePanning = false;
     controls.minDistance = 100;
     controls.maxDistance = 500;
-    controls.maxPolarAngle = Math.PI / 0.2;
-    // controls.enableZoom = false;
     controls.maxPolarAngle = Math.PI*0.4;
 
     
@@ -162,6 +160,7 @@ const main  = () => {
         renderer.toneMappingExposure = 0.2;
 
         requestAnimationFrame(render);
+        renderer.setPixelRatio( window.devicePixelRatio );
         controls.update();  
 
         renderer.render(scene, camera);
