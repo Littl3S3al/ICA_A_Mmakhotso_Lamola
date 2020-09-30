@@ -1,5 +1,7 @@
 import * as THREE from 'https://threejsfundamentals.org/threejs/resources/threejs/r119/build/three.module.js';
 import {OrbitControls} from 'https://threejsfundamentals.org/threejs/resources/threejs/r119/examples/jsm/controls/OrbitControls.js';
+import {GUI} from 'https://threejsfundamentals.org/threejs/../3rdparty/dat.gui.module.js';
+
 
 
 // variables for event listeners
@@ -24,6 +26,8 @@ const main  = () => {
     const renderer = new THREE.WebGLRenderer({canvas, antialias: true});
     renderer.setPixelRatio( window.devicePixelRatio );
     renderer.setSize( window.innerWidth, window.innerHeight );
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
     // camera
     const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 1, 100000 );
@@ -34,8 +38,8 @@ const main  = () => {
 
     // scene
     const scene = new THREE.Scene();
-    scene.background = new THREE.Color( 0xFFFFFF);
-    // scene.fog = new THREE.FogExp2( 0xFFFFFF  , 0.004 );
+    scene.background = new THREE.Color( 0xffffff);
+    scene.fog = new THREE.FogExp2( 0xFFFFFF  , 0.004 );
 
     
 
@@ -43,20 +47,20 @@ const main  = () => {
     const loadManager = new THREE.LoadingManager();
     const textureLoader = new THREE.TextureLoader(loadManager);
 
-
-    // lights
-    {
+    
+      {
         const color = 0xFFFFFF;
-        const intensity = 1;
-        const light = new THREE.DirectionalLight(color, intensity);
-        light.position.set(-1, 2, 4);
+        const intensity = 0.8;
+        const light = new THREE.SpotLight(color, intensity);
+        light.castShadow = true;
+        light.position.set(0, 100, 0);
+        light.target.position.set(-4, 0, -4);
+        light.penumbra = 1;
+        light.angle = 10;
         scene.add(light);
+        scene.add(light.target);
     }
 
-    {
-        const light = new THREE.AmbientLight(0xFFFFFF, 1);
-        scene.add(light);
-    }
 
 
     
@@ -77,7 +81,7 @@ const main  = () => {
     // set up world
     const invisMaterial = new THREE.MeshPhongMaterial( { color: 0xffffff, flatShading: true, transparent: true, opacity: 0 } );
 
-    const geometry = new THREE.CylinderBufferGeometry( 0, 10, 30, 4, 1 );
+    const geometry = new THREE.CylinderBufferGeometry( 0, 20, 30, 4, 1 );
     const material = new THREE.MeshPhongMaterial( { color: 0xffffff, flatShading: true } );
 
 
@@ -93,14 +97,16 @@ const main  = () => {
 
     for ( var i = 0; i < 1; i ++ ) {
         let pos = [
-            {x: -400, z: -50}
+            {x: -600, z: -50}
         ]
         var mesh = new THREE.Mesh( geometry, material );
         mesh.position.x = pos[i].x;
-        mesh.position.y = 50;
+        mesh.position.y = 30;
         mesh.position.z = pos[i].z;
         mesh.updateMatrix();
         mesh.matrixAutoUpdate = false;
+        mesh.castShadow = true; //default is false
+        mesh.receiveShadow = true;
         CenterOrb.add( mesh );
 
     }
@@ -118,9 +124,10 @@ const main  = () => {
     groundTexture.repeat.set(repeats, repeats);
 
     const planeGeo = new THREE.PlaneBufferGeometry(groundSize, groundSize);
-    const planeMat = new THREE.MeshBasicMaterial({map: groundTexture});
+    const planeMat = new THREE.MeshPhongMaterial({map: groundTexture});
 
     const mapMesh = new THREE.Mesh(planeGeo, planeMat);
+    mapMesh.receiveShadow = true;
     mapMesh.rotation.x = Math.PI * -.5;
     mapMesh.position.y = -10;
 
