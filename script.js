@@ -1,6 +1,5 @@
 import * as THREE from 'https://threejsfundamentals.org/threejs/resources/threejs/r119/build/three.module.js';
 import {OrbitControls} from 'https://threejsfundamentals.org/threejs/resources/threejs/r119/examples/jsm/controls/OrbitControls.js';
-import {GUI} from 'https://threejsfundamentals.org/threejs/../3rdparty/dat.gui.module.js';
 
 
 
@@ -82,7 +81,7 @@ const main  = () => {
     const invisMaterial = new THREE.MeshPhongMaterial( { color: 0xffffff, flatShading: true, transparent: true, opacity: 0 } );
 
     const geometry = new THREE.CylinderBufferGeometry( 0, 20, 30, 4, 1 );
-    const material = new THREE.MeshPhongMaterial( { color: 0xffffff, flatShading: true } );
+    
 
 
     const CenterOrb = new THREE.Mesh (geometry, invisMaterial)
@@ -95,11 +94,17 @@ const main  = () => {
 
     // sound beacons (pyramids)
 
+    const reflectWorld = new THREE.CubeTextureLoader()
+					.setPath( 'assets/soundReflection/' )
+                    .load( [ 'px.png', 'nx.png', 'py.png', 'ny.png', 'pz.png', 'nz.png' ] );
+                    
+    const reflectiveMaterial = new THREE.MeshBasicMaterial( { color: 0xffffff, envMap: reflectWorld} );
+
     for ( var i = 0; i < 1; i ++ ) {
         let pos = [
             {x: -600, z: -50}
         ]
-        var mesh = new THREE.Mesh( geometry, material );
+        var mesh = new THREE.Mesh( geometry, reflectiveMaterial );
         mesh.position.x = pos[i].x;
         mesh.position.y = 30;
         mesh.position.z = pos[i].z;
