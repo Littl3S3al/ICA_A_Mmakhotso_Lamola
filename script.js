@@ -1,7 +1,5 @@
 import * as THREE from 'https://threejsfundamentals.org/threejs/resources/threejs/r119/build/three.module.js';
 import {OrbitControls} from 'https://threejsfundamentals.org/threejs/resources/threejs/r119/examples/jsm/controls/OrbitControls.js';
-import { Sky } from 'https://threejsfundamentals.org/threejs/resources/threejs/r119/examples/jsm/objects/Sky.js';
-import { GUI } from 'https://threejsfundamentals.org/threejs/resources/threejs/r119/examples/jsm/libs/dat.gui.module.js';
 
 
 // variables for event listeners
@@ -11,57 +9,55 @@ const threeJsWindow = document.querySelector('#three-js-container');
 const popupWindow = document.querySelector('.popup-window');
 const closeBtn = document.querySelector('#btn-close');
 
+// loader
+const loadingElem = document.querySelector('#loading');
+const progressBarElem = loadingElem.querySelector('.progressbar');
+
+let windowHalfX = window.innerWidth / 2;
+let windowHalfY = window.innerHeight / 2;
+
 // three.js functions
 const main  = () => {
     const canvas = document.querySelector('#c');
-    const renderer = new THREE.WebGLRenderer({canvas});
 
-    const camera = new THREE.PerspectiveCamera(100, window.innerWidth / window.innerHeight, 1, 1000);
-    camera.position.x = 110;
-    camera.position.y = -10;
+    // renderer
+    const renderer = new THREE.WebGLRenderer({canvas, antialias: true});
+    renderer.setPixelRatio( window.devicePixelRatio );
+    renderer.setSize( window.innerWidth, window.innerHeight );
+
+    // camera
+    const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 1, 100000 );
+    camera.position.x = 0;
+    camera.position.y = 0;
     camera.position.z = 0;
 
 
+    // scene
     const scene = new THREE.Scene();
-    scene.fog = new THREE.FogExp2( 0xF48FB1  , 0.002 );
+    scene.background = new THREE.Color( 0xFFFFFF);
+    // scene.fog = new THREE.FogExp2( 0xFFFFFF  , 0.004 );
 
-    // sky
-    const sky = new Sky();
-    sky.scale.setScalar( 1000 );
-    scene.add( sky );
+    
 
-    const sun = new THREE.Vector3();
-
-    const theta = Math.PI * ( 0.47 - 0.5 );
-    const phi = 2 * Math.PI * ( 0.3 - 0.5 );
-    sun.x = Math.cos( phi );
-    sun.y = Math.sin( phi ) * Math.sin( theta );
-    sun.z = Math.sin( phi ) * Math.cos( theta );
-
-    const uniforms = sky.material.uniforms;
-    uniforms[ "turbidity" ].value = 15;
-    uniforms[ "rayleigh" ].value = 3;
-    uniforms[ "mieCoefficient" ].value = 0;
-    uniforms[ "mieDirectionalG" ].value = 0.7;
-    uniforms[ "sunPosition" ].value.copy( sun );
-
-    renderer.render( scene, camera );
+    // loaders
+    const loadManager = new THREE.LoadingManager();
+    const textureLoader = new THREE.TextureLoader(loadManager);
 
 
+    // lights
     {
         const color = 0xFFFFFF;
         const intensity = 1;
         const light = new THREE.DirectionalLight(color, intensity);
         light.position.set(-1, 2, 4);
         scene.add(light);
-      }
+    }
 
-      {
+    {
         const light = new THREE.AmbientLight(0xFFFFFF, 1);
         scene.add(light);
-      }
+    }
 
-    
 
     
     // orbit controls
@@ -70,33 +66,38 @@ const main  = () => {
     controls.enableDamping = true; // an animation loop is required when either damping or auto-rotation are enabled
     controls.dampingFactor = 0.05;
     controls.screenSpacePanning = false;
-    controls.minDistance = 100;
-    controls.maxDistance = 500;
-    controls.maxPolarAngle = Math.PI*0.4;
+    controls.minDistance = 50;
+    controls.maxDistance = 200;
+    controls.maxPolarAngle = 90 * Math.PI/180;
+    controls.minPolarAngle = 90 * Math.PI/180;
 
     
       
 
-    
-
     // set up world
+    const invisMaterial = new THREE.MeshPhongMaterial( { color: 0xffffff, flatShading: true, transparent: true, opacity: 0 } );
+
     const geometry = new THREE.CylinderBufferGeometry( 0, 10, 30, 4, 1 );
     const material = new THREE.MeshPhongMaterial( { color: 0xffffff, flatShading: true } );
 
 
-    const CenterOrb = new THREE.Mesh (geometry, material)
-    CenterOrb.position.x = -200;
+    const CenterOrb = new THREE.Mesh (geometry, invisMaterial)
+    CenterOrb.position.x = 600;
     CenterOrb.position.y = 0;
-    CenterOrb.rotation.y = 0;
+    CenterOrb.position.z = 0;
     scene.add( CenterOrb );
 
-    for ( var i = 0; i < 4; i ++ ) {
+
+
+    // sound beacons (pyramids)
+
+    for ( var i = 0; i < 1; i ++ ) {
         let pos = [
-            {x: 0, z: 200}, {x: -200, z: 0}, {x: 0, z: -200}, {x: 200, z: 0}
+            {x: -400, z: -50}
         ]
         var mesh = new THREE.Mesh( geometry, material );
         mesh.position.x = pos[i].x;
-        mesh.position.y = 10;
+        mesh.position.y = 50;
         mesh.position.z = pos[i].z;
         mesh.updateMatrix();
         mesh.matrixAutoUpdate = false;
@@ -105,55 +106,62 @@ const main  = () => {
     }
    
 
-    // set up maps
+    // set up ground plane
 
-    const createMap = (image, yPos) => {
-        const planeSize = 600;
+    const groundSize = 2500;
+    const groundTexture = textureLoader.load('assets/bluepring.jpg');
+    groundTexture.magFilter = THREE.NearestFilter;
+    groundTexture.wrapS = THREE.RepeatWrapping;
+    groundTexture.wrapT = THREE.RepeatWrapping;
+    groundTexture.magFilter = THREE.NearestFilter;
+    const repeats = groundSize / 100;
+    groundTexture.repeat.set(repeats, repeats);
 
-        const loader = new THREE.TextureLoader();
-        const texture = loader.load(image);
-        texture.magFilter = THREE.NearestFilter;
+    const planeGeo = new THREE.PlaneBufferGeometry(groundSize, groundSize);
+    const planeMat = new THREE.MeshBasicMaterial({map: groundTexture});
 
-        const planeGeo = new THREE.PlaneBufferGeometry(planeSize, planeSize);
-        const planeMat = new THREE.MeshPhongMaterial({
-            map: texture,
-            transparent: true,
-            alphaTest: 0
-        });
-        const mapMesh = new THREE.Mesh(planeGeo, planeMat);
-        mapMesh.rotation.x = Math.PI * -.5;
-        mapMesh.position.y = yPos;
-        planeMat.opacity = 0.2;
+    const mapMesh = new THREE.Mesh(planeGeo, planeMat);
+    mapMesh.rotation.x = Math.PI * -.5;
+    mapMesh.position.y = -10;
+
+    
+    
+
+    loadManager.onLoad = () => {
+        loadingElem.style.display = 'none';
         CenterOrb.add(mapMesh);
-    }
-    
-    createMap('assets/map_1.png', -20);
-    createMap('assets/map_3.png', -25);
-    createMap('assets/map_4.png', -30);
+        
+    };
+
+    loadManager.onProgress = (urlOfLastItemLoaded, itemsLoaded, itemsTotal) => {
+        const progress = itemsLoaded / itemsTotal*100;
+        progressBarElem.style.width = progress + '%';
+    };
+
     
 
-    const resizeRendererToDisplaySize = (renderer) => {
-        const canvas = renderer.domElement;
-        const width = canvas.clientWidth;
-        const height = canvas.clientHeight;
-        const needResize = canvas.width !== width || canvas.height !== height;
-        if (needResize) {
-        renderer.setSize(width, height, false);
-        }
-        return needResize;
+    renderer.render( scene, camera );
+
+    // resize function
+    const onWindowResize = () => {
+
+        windowHalfX = window.innerWidth / 2;
+        windowHalfY = window.innerHeight / 2;
+    
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+    
+        renderer.setSize( window.innerWidth, window.innerHeight );
+    
     }
 
     const render = (time) => {
 
-        time *= 0.00007;
+        time *= 0.00005;
 
-        if (resizeRendererToDisplaySize(renderer)) {
-        const canvas = renderer.domElement;
-        camera.aspect = canvas.clientWidth / canvas.clientHeight;
-        camera.updateProjectionMatrix();
-        }
+        window.addEventListener('resize', onWindowResize, false)
 
-        CenterOrb.rotation.y = time;
+        // CenterOrb.rotation.y = time;
 
         renderer.outputEncoding = THREE.sRGBEncoding;
         renderer.toneMapping = THREE.ACESFilmicToneMapping;
