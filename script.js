@@ -590,7 +590,7 @@ const main  = () => {
                 } else if(pickHelper.pickedObject.name.includes('world')){
                     blueColor(pickHelper.pickedObject, true);
                 } else if(pickHelper.pickedObject.name.includes('portfolio')){
-                    redColor(pickHelper.pickedObject.children[0], true)
+                    pinkColor(pickHelper.pickedObject.children[0], true)
                 }
             }
         }
@@ -610,7 +610,7 @@ const main  = () => {
 
         portfolioBeacons.forEach(beacon => {
             if(!itemSelected){
-                redColor(beacon.children[0], false);
+                pinkColor(beacon.children[0], false);
             }
         })
 
@@ -673,6 +673,14 @@ const main  = () => {
         if( g > 0.5 && blue){ g -= 0.01 };
         object.material.color.setRGB(r, g, 1);
     }
+
+    const pinkColor = (object, blue) => {
+        let g = object.material.color.g;
+        if( g < 1 && !blue){ g += 0.05 };
+        if( g > 0.5 && blue){ g -= 0.05 };
+        object.material.color.setRGB(1, g, 1);
+    }
+
 
     function getCanvasRelativePosition(event) {
 		const rect = canvas.getBoundingClientRect();
