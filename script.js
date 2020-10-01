@@ -578,7 +578,9 @@ const main  = () => {
 
         window.addEventListener('resize', onWindowResize, false)
 
-        CenterOrb.rotation.y = time;
+        if(!viewing){
+            CenterOrb.rotation.y = time;
+        }
 
         pickHelper.pick(pickPosition, scene, camera, time);
         
@@ -731,7 +733,8 @@ const main  = () => {
 	}, {passive: false});
 
 	window.addEventListener('touchmove', (event) => {
-		setPickPosition(event.touches[0]);
+        setPickPosition(event.touches[0]);
+        checkForClick();
 	});
 
 	window.addEventListener('touchend', () => {
@@ -772,20 +775,39 @@ const playSound = (number) => {
     audios[no].play();
 }
 
+const portfolios = [
+    'https://issuu.com/mmakhotsolamola/docs/mmakhotso_lamola_portfolio_2020',
+    'https://issuu.com/mmakhotsolamola/docs/mmakhotso_lamola_portfolio_2020',
+    'https://issuu.com/mmakhotsolamola/docs/mmakhotso_lamola_portfolio_2020'
+]
 const openPortfolio = (number) => {
-    console.log('portfolio' + number);
-    popupWindow.style.display = 'flex';
-    popupWindow.style.opacity = 1;
-    viewing = true;
+    openWindow();
+    const iframe = popupWindow.querySelector('iframe');
+    iframe.classList.remove('d-none');
+    iframe.src = portfolios[number];
 }
 
 
 
 closeBtn.addEventListener('click', () => {
     console.log('click');
+    closeWindow();
+})
+closeBtn.addEventListener('touchstart', () => {
+    closeWindow();
+})
+
+function closeWindow() {
     popupWindow.style.opacity = 0;
     setTimeout(() => {
         popupWindow.style.display = 'none';
     }, 1000);
     viewing = false;
-})
+    const iframe = popupWindow.querySelector('iframe');
+    iframe.classList.add('d-none');
+}
+function openWindow(){
+    popupWindow.style.display = 'flex';
+    popupWindow.style.opacity = 1;
+    viewing = true;
+}

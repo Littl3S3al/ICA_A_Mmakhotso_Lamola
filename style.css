@@ -81,6 +81,10 @@ body {
 .popup-window canvas {
   display: none;
 }
+.popup-window iframe {
+  width: 100vw;
+  height: 100vh;
+}
 
 .hide {
   opacity: 0;
