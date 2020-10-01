@@ -301,7 +301,6 @@ pins = pinsFormation[ 1 ];
 
 
 var clothGeometry;
-var object;
 
 
 
@@ -325,14 +324,15 @@ const main  = () => {
 
     // scene
     const scene = new THREE.Scene();
-    scene.background = new THREE.Color( 0xFCE4EC  );
-    scene.fog = new THREE.FogExp2( 0xFCE4EC  , 0.007 );
+    scene.background = new THREE.Color( 0xffffff  );
+    scene.fog = new THREE.FogExp2( 0xffffff  , 0.007 );
 
     
 
     // loaders
     const loadManager = new THREE.LoadingManager();
     const textureLoader = new THREE.TextureLoader(loadManager);
+    const cubeTextureLoader = new THREE.CubeTextureLoader(loadManager);
 
     
     const addPointLight = (shade, intense, parent, angle, far, top, distance) => {
@@ -388,7 +388,7 @@ const main  = () => {
 
     // sound beacons (pyramids)
 
-    const reflectWorld = new THREE.CubeTextureLoader()
+    const reflectWorld = cubeTextureLoader
         .setPath( 'assets/soundReflection/' )
         .load( [ 'px.png', 'nx.png', 'py.png', 'ny.png', 'pz.png', 'nz.png' ] );
                     
@@ -407,16 +407,15 @@ const main  = () => {
         mesh.castShadow = true; //default is false
         mesh.receiveShadow = true;
         mesh.name = 'soundBeacon' + i;
-        CenterOrb.add( mesh );
         soundBeacons.push(mesh);
 
     }
 
     let worldBeacons = [];
     const sphereGeometry = new THREE.SphereGeometry( 20, 32, 32 );
-    const waterWorld = new THREE.CubeTextureLoader()
+    const waterWorld = cubeTextureLoader
         .setPath( 'assets/worldReflection/' )
-        .load( [ 'px.png', 'nx.png', 'py.png', 'ny.png', 'pz.png', 'nz.png' ] );
+        .load( [ 'px.png', 'px.png', 'px.png', 'px.png', 'px.png', 'px.png' ] );
                     
     const waterMaterial = new THREE.MeshBasicMaterial( { color: 'rgb(255,255,255)', envMap: waterWorld, refractionRatio: 0.8} );
     waterMaterial.envMap.mapping = THREE.CubeRefractionMapping;
@@ -432,7 +431,6 @@ const main  = () => {
         mesh.castShadow = true;
         mesh.receiveShadow = true;
         mesh.name = 'worldBeacon' + i;
-        CenterOrb.add(mesh);
         worldBeacons.push(mesh);
 
     }
@@ -448,8 +446,7 @@ const main  = () => {
     // cloth
     // cloth material
 
-    var loader = new THREE.TextureLoader();
-    var clothTexture = loader.load( 'assets/pattern.png' );
+    var clothTexture = textureLoader.load( 'assets/pattern.png' );
     clothTexture.anisotropy = 16;
 
     var clothMaterial = new THREE.MeshLambertMaterial( {
@@ -517,6 +514,12 @@ const main  = () => {
     loadManager.onLoad = () => {
         loadingElem.style.display = 'none';
         CenterOrb.add(mapMesh);
+        soundBeacons.forEach(beacon => {
+            CenterOrb.add(beacon);
+        });
+        worldBeacons.forEach(beacon => {
+            CenterOrb.add(beacon);
+        })
         
     };
 
