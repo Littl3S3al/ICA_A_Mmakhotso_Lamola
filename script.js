@@ -676,8 +676,8 @@ const main  = () => {
 
     const pinkColor = (object, blue) => {
         let g = object.material.color.g;
-        if( g < 1 && !blue){ g += 0.05 };
-        if( g > 0.5 && blue){ g -= 0.05 };
+        if( g < 1 && !blue){ g += 0.005 };
+        if( g > 0.5 && blue){ g -= 0.005 };
         object.material.color.setRGB(1, g, 1);
     }
 
@@ -746,12 +746,6 @@ beginBtn.addEventListener('click', () => {
     main();
 });
 
-closeBtn.addEventListener('click', () => {
-    popupWindow.classList.add('hide');
-    setTimeout(() => {
-        popupWindow.style.display = 'none';
-    }, 1000);
-})
 
 
 // functions
@@ -763,7 +757,7 @@ const checkForClick = () => {
     if(!orbiting && currentObject){
         var lastChar = currentObject[currentObject.length -1];
         if(currentObject.includes('soundBeacon')){playSound(lastChar);}
-        else if(currentObject.includes('portfolio')){console.log(currentObject)}
+        else if(currentObject.includes('portfolio')){openPortfolio(lastChar)}
         else if(currentObject.includes('world')){console.log(currentObject)}
     }
 
@@ -775,3 +769,19 @@ const playSound = (number) => {
     audios.forEach(audio => { audio.pause(); })
     audios[no].play();
 }
+
+const openPortfolio = (number) => {
+    console.log('portfolio' + number);
+    popupWindow.style.display = 'flex';
+    popupWindow.style.opacity = 1;
+}
+
+
+
+closeBtn.addEventListener('click', () => {
+    console.log('click');
+    popupWindow.style.opacity = 0;
+    setTimeout(() => {
+        popupWindow.style.display = 'none';
+    }, 1000);
+})

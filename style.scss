@@ -64,7 +64,7 @@ body{
 
 
 .popup-window{
-    background: black;
+    background: rgba(0, 0, 0, 0.8);
     width: 100vw;
     height: 100vh;
     z-index: 100;
@@ -72,7 +72,7 @@ body{
     top: 0;
     left: 0;
     color: white;
-    opacity: 1;
+    opacity: 0;
     transition: opacity 1s ease;
     display: none;
     #btn-close{
