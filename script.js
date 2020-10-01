@@ -27,6 +27,15 @@ let orbiting = false;
 let viewing = false;
 
 
+const worldMaps = [
+    'assets/worlds/1.png', 
+    'assets/worlds/2.png',
+    'assets/worlds/3.png',
+    'assets/worlds/4.png',
+    'assets/worlds/5.png'
+]
+
+
 
 var DAMPING = 0.03;
 var DRAG = 1 - DAMPING;
@@ -333,6 +342,10 @@ const main  = () => {
     const loadManager = new THREE.LoadingManager();
     const textureLoader = new THREE.TextureLoader(loadManager);
     const cubeTextureLoader = new THREE.CubeTextureLoader(loadManager);
+
+   worldMaps.forEach(map => {
+       textureLoader.load(map);
+   })
 
     
     const addPointLight = (shade, intense, parent, angle, far, top, distance) => {
@@ -799,13 +812,6 @@ const openPortfolio = (number) => {
 };
 
 
-const worldMaps = [
-    'assets/worlds/1.png', 
-    'assets/worlds/2.png',
-    'assets/worlds/3.png',
-    'assets/worlds/4.png',
-    'assets/worlds/5.png'
-]
 const openWorld = (number) => {
     const newCanvas = popupWindow.querySelector('#d');
     newCanvas.style.display = 'block';
