@@ -28,7 +28,7 @@ let orbiting = false;
 var DAMPING = 0.03;
 var DRAG = 1 - DAMPING;
 var MASS = 0.1;
-var restDistance = 3;
+var restDistance = 5;
 
 var xSegs = 10;
 var ySegs = 10;
@@ -37,7 +37,7 @@ var clothFunction = plane( restDistance * xSegs, restDistance * ySegs );
 
 var cloth = new Cloth( xSegs, ySegs );
 
-var GRAVITY = 981 * 1;
+var GRAVITY = 500;
 var gravity = new THREE.Vector3( 0, - GRAVITY, 0 ).multiplyScalar( MASS );
 
 
@@ -84,7 +84,6 @@ function Particle( x, y, z, mass ) {
 }
 
 // Force -> Acceleration
-
 Particle.prototype.addForce = function ( force ) {
 
     this.a.add(
@@ -93,9 +92,7 @@ Particle.prototype.addForce = function ( force ) {
 
 };
 
-
 // Performs Verlet integration
-
 Particle.prototype.integrate = function ( timesq ) {
 
     var newPos = this.tmp.subVectors( this.position, this.previous );
@@ -110,7 +107,6 @@ Particle.prototype.integrate = function ( timesq ) {
 
 };
 
-
 var diff = new THREE.Vector3();
 
 function satisfyConstraints( p1, p2, distance ) {
@@ -124,7 +120,6 @@ function satisfyConstraints( p1, p2, distance ) {
     p2.position.sub( correctionHalf );
 
 }
-
 
 function Cloth( w, h ) {
 
@@ -211,7 +206,7 @@ function Cloth( w, h ) {
 
 function simulate( now ) {
 
-    var windStrength = Math.cos( now / 7000 ) * 20 ;
+    var windStrength = Math.cos( now / 7000 ) * 10 ;
 
     windForce.set( Math.sin( now / 2000 ), Math.cos( now / 3000 ), Math.sin( now / 1000 ) );
     windForce.normalize();
@@ -302,11 +297,7 @@ pinsFormation.push( pins );
 pins = pinsFormation[ 1 ];
 
 
-var container, stats;
-var camera, scene, renderer;
-
 var clothGeometry;
-var sphere;
 var object;
 
 
@@ -332,7 +323,7 @@ const main  = () => {
     // scene
     const scene = new THREE.Scene();
     scene.background = new THREE.Color( 0xFCE4EC  );
-    // scene.fog = new THREE.FogExp2( 0xFCE4EC  , 0.007 );
+    scene.fog = new THREE.FogExp2( 0xFCE4EC  , 0.007 );
 
     
 
@@ -357,6 +348,8 @@ const main  = () => {
     }
 
     addPointLight(0xFFFFFF, 0.8, scene, 5, 500, 100, 1000);
+
+    scene.add( new THREE.AmbientLight( 0x666666 ) );
 
 
 
@@ -441,14 +434,23 @@ const main  = () => {
 
     }
 
+
+    // portfolio beacons
+    let portfolioBeacons = [];
+
+    // cloth parent
+    var planeGeometry = new THREE.PlaneBufferGeometry( 50, 70);
+    var planeMaterial = new THREE.MeshBasicMaterial( {color: 0xffff00, side: THREE.DoubleSide, transparent: true, opacity: 0});
+
     // cloth
     // cloth material
 
     var loader = new THREE.TextureLoader();
-    var clothTexture = loader.load( 'assets/circuit_pattern.png' );
+    var clothTexture = loader.load( 'assets/pattern.png' );
     clothTexture.anisotropy = 16;
 
     var clothMaterial = new THREE.MeshLambertMaterial( {
+        color: 'rgb(255, 255, 255)',
         map: clothTexture,
         side: THREE.DoubleSide,
         alphaTest: 0.5
@@ -460,16 +462,32 @@ const main  = () => {
 
     // cloth mesh
 
-    object = new THREE.Mesh( clothGeometry, clothMaterial );
-    object.position.set( -250, 30, 0 );
-    object.castShadow = true;
-    CenterOrb.add( object );
+   for(var i = 0; i < 3; i ++){
+        let pos = [
+            {x: -150, z: -150}, {x: 250, z: -10}, {x: -50, z: 270}
+        ]
 
-    object.customDepthMaterial = new THREE.MeshDepthMaterial( {
-        depthPacking: THREE.RGBADepthPacking,
-        map: clothTexture,
-        alphaTest: 0.5
-    } );
+        var plane = new THREE.Mesh( planeGeometry, planeMaterial );
+        plane.position.set( pos[i].x, 25, pos[i].z );
+        CenterOrb.add( plane );
+        plane.name = 'portfolioBeacon' + i;
+
+        var object = new THREE.Mesh( clothGeometry, clothMaterial );
+        object.position.set(0, 0, 0);
+        object.castShadow = true;
+        
+
+        object.customDepthMaterial = new THREE.MeshDepthMaterial( {
+            depthPacking: THREE.RGBADepthPacking,
+            map: clothTexture,
+            alphaTest: 1
+        } );
+        plane.add(object);
+
+        portfolioBeacons.push(plane);
+   }
+
+   console.log(portfolioBeacons);
 
 
     // set up ground plane
@@ -571,6 +589,8 @@ const main  = () => {
                     redColor(pickHelper.pickedObject, true);
                 } else if(pickHelper.pickedObject.name.includes('world')){
                     blueColor(pickHelper.pickedObject, true);
+                } else if(pickHelper.pickedObject.name.includes('portfolio')){
+                    redColor(pickHelper.pickedObject.children[0], true)
                 }
             }
         }
@@ -585,6 +605,12 @@ const main  = () => {
         worldBeacons.forEach(beacon => {
             if(!itemSelected){
                 blueColor(beacon, false);
+            }
+        })
+
+        portfolioBeacons.forEach(beacon => {
+            if(!itemSelected){
+                redColor(beacon.children[0], false);
             }
         })
 
@@ -729,6 +755,8 @@ const checkForClick = () => {
     if(!orbiting && currentObject){
         var lastChar = currentObject[currentObject.length -1];
         if(currentObject.includes('soundBeacon')){playSound(lastChar);}
+        else if(currentObject.includes('portfolio')){console.log(currentObject)}
+        else if(currentObject.includes('world')){console.log(currentObject)}
     }
 
     currentObject = undefined;
