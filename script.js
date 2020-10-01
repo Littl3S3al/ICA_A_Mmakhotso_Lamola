@@ -754,6 +754,11 @@ beginBtn.addEventListener('click', () => {
     main();
 });
 
+beginBtn.addEventListener('touchend', () => {
+    overlay.style.display = 'none';
+    threeJsWindow.style.display = 'block';
+    main();
+});
 
 
 // functions
