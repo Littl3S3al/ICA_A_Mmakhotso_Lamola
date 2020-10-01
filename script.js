@@ -22,6 +22,7 @@ let windowHalfX = window.innerWidth / 2;
 let windowHalfY = window.innerHeight / 2;
 
 let orbiting = false;
+let viewing = false;
 
 
 
@@ -620,31 +621,32 @@ const main  = () => {
         renderer.setPixelRatio( window.devicePixelRatio );
         // controls.update();  
 
-        renderer.render(scene, camera);
-        requestAnimationFrame(render);
+            renderer.render(scene, camera);
+            requestAnimationFrame(render);
+
 
         
     }
 
     function animate( now ) {
+            requestAnimationFrame( animate );
+            simulate( now );
+            
 
-        requestAnimationFrame( animate );
-        simulate( now );
-        
+            var p = cloth.particles;
 
-        var p = cloth.particles;
+            for ( var i = 0, il = p.length; i < il; i ++ ) {
 
-        for ( var i = 0, il = p.length; i < il; i ++ ) {
+                var v = p[ i ].position;
 
-            var v = p[ i ].position;
+                clothGeometry.attributes.position.setXYZ( i, v.x, v.y, v.z );
 
-            clothGeometry.attributes.position.setXYZ( i, v.x, v.y, v.z );
+            }
 
-        }
+            clothGeometry.attributes.position.needsUpdate = true;
 
-        clothGeometry.attributes.position.needsUpdate = true;
+            clothGeometry.computeVertexNormals();
 
-        clothGeometry.computeVertexNormals();
     }
 
     animate(0);
@@ -754,7 +756,7 @@ window.addEventListener('mousedown', () => {
 });
 
 const checkForClick = () => {
-    if(!orbiting && currentObject){
+    if(!orbiting &&!viewing && currentObject){
         var lastChar = currentObject[currentObject.length -1];
         if(currentObject.includes('soundBeacon')){playSound(lastChar);}
         else if(currentObject.includes('portfolio')){openPortfolio(lastChar)}
@@ -774,6 +776,7 @@ const openPortfolio = (number) => {
     console.log('portfolio' + number);
     popupWindow.style.display = 'flex';
     popupWindow.style.opacity = 1;
+    viewing = true;
 }
 
 
@@ -784,4 +787,5 @@ closeBtn.addEventListener('click', () => {
     setTimeout(() => {
         popupWindow.style.display = 'none';
     }, 1000);
+    viewing = false;
 })
