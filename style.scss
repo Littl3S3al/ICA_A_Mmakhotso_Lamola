@@ -67,14 +67,13 @@ body{
     background: rgba(0, 0, 0, 0.8);
     width: 100vw;
     height: 100vh;
-    z-index: 100;
+    z-index: -10;
     position: fixed;
     top: 0;
     left: 0;
     color: white;
     opacity: 0;
     transition: opacity 1s ease;
-    display: none;
     #btn-close{
         position: fixed;
         top: 10px;
@@ -82,10 +81,16 @@ body{
     }
     canvas{
         display: none;
-    }
-    iframe{
         width: 100vw;
         height: 100vh;
+    }
+    iframe{
+        width: 90vw;
+        height: 90vh;
+        margin: auto;
+        margin-top: 70px;
+        border: none;
+        border-radius: 5px;
     }
 }
 

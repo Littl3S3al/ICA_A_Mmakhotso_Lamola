@@ -64,14 +64,13 @@ body {
   background: rgba(0, 0, 0, 0.8);
   width: 100vw;
   height: 100vh;
-  z-index: 100;
+  z-index: -10;
   position: fixed;
   top: 0;
   left: 0;
   color: white;
   opacity: 0;
   transition: opacity 1s ease;
-  display: none;
 }
 .popup-window #btn-close {
   position: fixed;
@@ -80,10 +79,16 @@ body {
 }
 .popup-window canvas {
   display: none;
-}
-.popup-window iframe {
   width: 100vw;
   height: 100vh;
+}
+.popup-window iframe {
+  width: 90vw;
+  height: 90vh;
+  margin: auto;
+  margin-top: 70px;
+  border: none;
+  border-radius: 5px;
 }
 
 .hide {

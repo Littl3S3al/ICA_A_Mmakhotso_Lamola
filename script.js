@@ -1,6 +1,8 @@
 import * as THREE from 'https://threejsfundamentals.org/threejs/resources/threejs/r119/build/three.module.js';
 import {OrbitControls} from 'https://threejsfundamentals.org/threejs/resources/threejs/r119/examples/jsm/controls/OrbitControls.js';
 
+import {secondary} from '/wordScript.js';
+
 
 
 // variables for event listeners
@@ -372,7 +374,7 @@ const main  = () => {
     // set up world
     const invisMaterial = new THREE.MeshPhongMaterial( { color: 0xffffff, flatShading: true, transparent: true, opacity: 0 } );
 
-    const geometry = new THREE.CylinderBufferGeometry( 0, 20, 30, 4, 1 );
+    const geometry = new THREE.CylinderBufferGeometry( 0, 50, 50, 4, 1 );
     
 
 
@@ -488,7 +490,6 @@ const main  = () => {
         portfolioBeacons.push(plane);
    }
 
-   console.log(portfolioBeacons);
 
 
     // set up ground plane
@@ -529,6 +530,7 @@ const main  = () => {
   class PickHelper {
     constructor() {
       this.raycaster = new THREE.Raycaster();
+      this.raycaster.far = 300;
       this.pickedObject = null;
       this.pickedObjectSavedColor = 0;
     }
@@ -571,60 +573,60 @@ const main  = () => {
     }
 
     const render = (time) => {
-
-        let itemSelected = false;
-
-        time *= 0.0001;
-
-        window.addEventListener('resize', onWindowResize, false)
+        currentObject = undefined;
 
         if(!viewing){
-            CenterOrb.rotation.y = time;
-        }
+            let itemSelected = false;
 
-        pickHelper.pick(pickPosition, scene, camera, time);
-        
-        if(pickHelper.pickedObject && !orbiting){
-            if(pickHelper.pickedObject.name){
-                currentObject = pickHelper.pickedObject.name;
-                itemSelected = true;
-                if(pickHelper.pickedObject.name.includes('sound')){
-                    redColor(pickHelper.pickedObject, true);
-                } else if(pickHelper.pickedObject.name.includes('world')){
-                    blueColor(pickHelper.pickedObject, true);
-                } else if(pickHelper.pickedObject.name.includes('portfolio')){
-                    pinkColor(pickHelper.pickedObject.children[0], true)
+            time *= 0.0001;
+
+            window.addEventListener('resize', onWindowResize, false)
+
+            CenterOrb.rotation.y = time/2;
+
+
+            pickHelper.pick(pickPosition, scene, camera, time);
+            
+            if(pickHelper.pickedObject && !orbiting){
+                if(pickHelper.pickedObject.name){
+                    currentObject = pickHelper.pickedObject.name;
+                    itemSelected = true;
+                    if(pickHelper.pickedObject.name.includes('sound')){
+                        redColor(pickHelper.pickedObject, true);
+                    } else if(pickHelper.pickedObject.name.includes('world')){
+                        blueColor(pickHelper.pickedObject, true);
+                    } else if(pickHelper.pickedObject.name.includes('portfolio')){
+                        pinkColor(pickHelper.pickedObject.children[0], true)
+                    }
                 }
             }
-        }
 
-        soundBeacons.forEach(beacon => {
-            beacon.rotation.y = time;
-            if(!itemSelected){
-                redColor(beacon, false);
-            }
-        });
+            soundBeacons.forEach(beacon => {
+                beacon.rotation.y = -time*10;
+                if(!itemSelected){
+                    redColor(beacon, false);
+                }
+            });
 
-        worldBeacons.forEach(beacon => {
-            if(!itemSelected){
-                blueColor(beacon, false);
-            }
-        })
+            worldBeacons.forEach(beacon => {
+                if(!itemSelected){
+                    blueColor(beacon, false);
+                }
+            })
 
-        portfolioBeacons.forEach(beacon => {
-            if(!itemSelected){
-                pinkColor(beacon.children[0], false);
-            }
-        })
-
+            portfolioBeacons.forEach(beacon => {
+                if(!itemSelected){
+                    pinkColor(beacon.children[0], false);
+                }
+            })
 
 
-        
-        renderer.setPixelRatio( window.devicePixelRatio );
-        // controls.update();  
 
+            
+            renderer.setPixelRatio( window.devicePixelRatio );
             renderer.render(scene, camera);
-            requestAnimationFrame(render);
+        }
+        requestAnimationFrame(render);
 
 
         
@@ -740,6 +742,7 @@ const main  = () => {
 	window.addEventListener('touchend', () => {
         clearPickPosition();
         orbiting = false;
+        checkForClick();
 	})
 }
 
@@ -754,7 +757,7 @@ beginBtn.addEventListener('click', () => {
 
 
 // functions
-window.addEventListener('mousedown', () => {
+window.addEventListener('mouseup', () => {
     checkForClick();
 });
 
@@ -763,7 +766,7 @@ const checkForClick = () => {
         var lastChar = currentObject[currentObject.length -1];
         if(currentObject.includes('soundBeacon')){playSound(lastChar);}
         else if(currentObject.includes('portfolio')){openPortfolio(lastChar)}
-        else if(currentObject.includes('world')){console.log(currentObject)}
+        else if(currentObject.includes('world')){openWorld(lastChar)}
     }
 
     currentObject = undefined;
@@ -785,12 +788,26 @@ const openPortfolio = (number) => {
     const iframe = popupWindow.querySelector('iframe');
     iframe.classList.remove('d-none');
     iframe.src = portfolios[number];
+};
+
+
+const worldMaps = [
+    'assets/worlds/1.png', 
+    'assets/worlds/2.png',
+    'assets/worlds/3.png',
+    'assets/worlds/4.png',
+    'assets/worlds/5.png'
+]
+const openWorld = (number) => {
+    const newCanvas = popupWindow.querySelector('#d');
+    newCanvas.style.display = 'block';
+    openWindow();
+    secondary(worldMaps[number]);
 }
 
 
 
 closeBtn.addEventListener('click', () => {
-    console.log('click');
     closeWindow();
 })
 closeBtn.addEventListener('touchstart', () => {
@@ -800,14 +817,16 @@ closeBtn.addEventListener('touchstart', () => {
 function closeWindow() {
     popupWindow.style.opacity = 0;
     setTimeout(() => {
-        popupWindow.style.display = 'none';
-    }, 1000);
+        popupWindow.style.zIndex = -10;
+    }, 1200)
     viewing = false;
     const iframe = popupWindow.querySelector('iframe');
     iframe.classList.add('d-none');
+    const newCanvas = popupWindow.querySelector('#d');
+    newCanvas.style.display = 'none';
 }
 function openWindow(){
-    popupWindow.style.display = 'flex';
     popupWindow.style.opacity = 1;
+    popupWindow.style.zIndex = 100;
     viewing = true;
 }
