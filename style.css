@@ -86,7 +86,7 @@ body {
 .popup-window iframe {
   width: 90vw;
   height: 90vh;
-  margin: auto;
+  margin-left: 5vw;
   margin-top: 70px;
   border: none;
   border-radius: 5px;
