@@ -129,6 +129,31 @@ const main  = () => {
 
     }
 
+    let worldBeacons = [];
+    const sphereGeometry = new THREE.SphereGeometry( 20, 32, 32 );
+    const waterWorld = new THREE.CubeTextureLoader()
+        .setPath( 'assets/worldReflection/' )
+        .load( [ 'px.png', 'nx.png', 'py.png', 'ny.png', 'pz.png', 'nz.png' ] );
+                    
+    const waterMaterial = new THREE.MeshBasicMaterial( { color: 'rgb(255,255,255)', envMap: waterWorld, refractionRatio: 0.8} );
+    waterMaterial.envMap.mapping = THREE.CubeRefractionMapping;
+
+    for(var i = 0; i < 2; i ++){
+        let pos = [
+            {x: -250, z: -250}, {x: 100, z: -100}, {x: 250, z: 250}, {x: 10, z: 200}, {x: -170, z: 100}
+        ];
+        var mesh = new THREE.Mesh( sphereGeometry, waterMaterial );
+        mesh.position.x = pos[i].x;
+        mesh.position.z = pos[i].z;
+        mesh.position.y = 20;
+        mesh.castShadow = true;
+        mesh.receiveShadow = true;
+        mesh.name = 'worldBeacon' + i;
+        CenterOrb.add(mesh);
+        worldBeacons.push(mesh);
+
+    }
+
 
     // set up ground plane
 
@@ -225,7 +250,11 @@ const main  = () => {
             if(pickHelper.pickedObject.name){
                 currentObject = pickHelper.pickedObject.name;
                 itemSelected = true;
-                redColor(pickHelper.pickedObject, true);
+                if(pickHelper.pickedObject.name.includes('sound')){
+                    redColor(pickHelper.pickedObject, true);
+                } else if(pickHelper.pickedObject.name.includes('world')){
+                    blueColor(pickHelper.pickedObject, true);
+                }
             }
         }
 
@@ -236,10 +265,16 @@ const main  = () => {
             }
         });
 
+        worldBeacons.forEach(beacon => {
+            if(!itemSelected){
+                blueColor(beacon, false);
+            }
+        })
+
 
 
         
-        // renderer.setPixelRatio( window.devicePixelRatio );
+        renderer.setPixelRatio( window.devicePixelRatio );
         // controls.update();  
 
         renderer.render(scene, camera);
@@ -254,11 +289,21 @@ const main  = () => {
     const redColor = (object, red) => {
         let g = object.material.color.g;
         let b = object.material.color.b;
-        if( g < 1 && !red){ g += 0.01 };
-        if( b < 1 && !red){ b += 0.01 };
-        if( g > 0 && red){ g -= 0.01 };
-        if( b > 0 && red){ b -= 0.01 };
+        if( g < 1 && !red){ g += 0.05 };
+        if( b < 1 && !red){ b += 0.05 };
+        if( g > 0 && red){ g -= 0.05 };
+        if( b > 0 && red){ b -= 0.05 };
         object.material.color.setRGB(1, g, b);
+    }
+
+    const blueColor = (object, blue) => {
+        let r = object.material.color.r;
+        let g = object.material.color.g;
+        if( r < 1 && !blue){ r += 0.05 };
+        if( g < 1 && !blue){ g += 0.01 };
+        if( r > 0 && blue){ r -= 0.05 };
+        if( g > 0.5 && blue){ g -= 0.01 };
+        object.material.color.setRGB(r, g, 1);
     }
 
     function getCanvasRelativePosition(event) {
