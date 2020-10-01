@@ -33,7 +33,7 @@ import * as THREE from 'https://threejsfundamentals.org/threejs/resources/threej
     // invert the geometry on the x-axis so that all of the faces point inward
     geometry.scale( - 1, 1, 1 );
 
-    var texture = new THREE.TextureLoader().load( asset );
+    var texture = asset;
     var material = new THREE.MeshBasicMaterial( { map: texture } );
 
     const mesh = new THREE.Mesh( geometry, material );

@@ -34,6 +34,7 @@ const worldMaps = [
     'assets/worlds/4.png',
     'assets/worlds/5.png'
 ]
+let loadedWorlds = [];
 
 
 
@@ -344,7 +345,7 @@ const main  = () => {
     const cubeTextureLoader = new THREE.CubeTextureLoader(loadManager);
 
    worldMaps.forEach(map => {
-       textureLoader.load(map);
+       loadedWorlds.push(textureLoader.load(map));
    })
 
     
@@ -816,7 +817,7 @@ const openWorld = (number) => {
     const newCanvas = popupWindow.querySelector('#d');
     newCanvas.style.display = 'block';
     openWindow();
-    secondary(worldMaps[number]);
+    secondary(loadedWorlds[number]);
 }
 
 
