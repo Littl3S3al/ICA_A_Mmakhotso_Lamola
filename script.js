@@ -1,5 +1,6 @@
 import * as THREE from 'https://threejsfundamentals.org/threejs/resources/threejs/r119/build/three.module.js';
 import {OrbitControls} from 'https://threejsfundamentals.org/threejs/resources/threejs/r119/examples/jsm/controls/OrbitControls.js';
+import { PositionalAudioHelper } from 'https://threejsfundamentals.org/threejs/resources/threejs/r119/examples/jsm/helpers/PositionalAudioHelper.js';
 
 import {secondary} from './worldScript.js';
 
@@ -17,7 +18,13 @@ const btnBack = document.querySelector('#backwards');
 let currentAngle = 0;
 let actualAngle = 0;
 
-const audios = document.querySelectorAll('.audio');
+const audios = [
+    'assets/sounds/bensound-cute.mp3',
+    'assets/sounds/bensound-hey.mp3',
+    'assets/sounds/bensound-relaxing.mp3',
+    'assets/sounds/bensound-ukulele.mp3'
+];
+const loadedAudios = [];
 const whispering = document.querySelector('.audio-overall')
 
 let currentObject;
@@ -34,13 +41,14 @@ let viewing = false;
 
 
 const worldMaps = [
-    'assets/worlds/1.png', 
-    'assets/worlds/2.png',
-    'assets/worlds/3.png',
-    'assets/worlds/4.png',
-    'assets/worlds/5.png'
+    'assets/soundReflection/', 
+    'assets/soundReflection/', 
+    'assets/soundReflection/', 
+    'assets/soundReflection/', 
+    'assets/soundReflection/'
 ]
 let loadedWorlds = [];
+const worldSounds = document.querySelectorAll('.world-audio');
 
 
 
@@ -331,6 +339,10 @@ const main  = () => {
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
+    // bring in audio listener
+    const listener = new THREE.AudioListener();
+    const audioLoader = new THREE.AudioLoader();
+
     // camera
     const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 1, 100000 );
     camera.position.x = 0;
@@ -351,7 +363,10 @@ const main  = () => {
     const cubeTextureLoader = new THREE.CubeTextureLoader(loadManager);
 
    worldMaps.forEach(map => {
-       loadedWorlds.push(textureLoader.load(map));
+    const world = cubeTextureLoader
+    .setPath( map )
+    .load( [ 'px.png', 'px.png', 'px.png', 'px.png', 'px.png', 'px.png' ] );
+    loadedWorlds.push(world);
    })
 
     
@@ -429,6 +444,16 @@ const main  = () => {
         mesh.receiveShadow = true;
         mesh.name = 'soundBeacon' + i;
         soundBeacons.push(mesh);
+
+        const sound = new THREE.PositionalAudio( listener );
+        audioLoader.load( audios[i], function ( buffer ) {
+
+            sound.setBuffer( buffer );
+            sound.setRefDistance( 2 );
+
+        } );
+        loadedAudios.push(sound);
+        mesh.add( sound );
 
     }
 
@@ -630,9 +655,9 @@ const main  = () => {
                     currentObject = pickHelper.pickedObject.name;
                     itemSelected = true;
                     if(pickHelper.pickedObject.name.includes('sound')){
-                        redColor(pickHelper.pickedObject, true);
+                        pinkColor(pickHelper.pickedObject, true);
                     } else if(pickHelper.pickedObject.name.includes('world')){
-                        blueColor(pickHelper.pickedObject, true);
+                        pinkColor(pickHelper.pickedObject, true);
                     } else if(pickHelper.pickedObject.name.includes('portfolio')){
                         pinkColor(pickHelper.pickedObject.children[0], true)
                     }
@@ -642,13 +667,13 @@ const main  = () => {
             soundBeacons.forEach(beacon => {
                 beacon.rotation.y = -time;
                 if(!itemSelected){
-                    redColor(beacon, false);
+                    pinkColor(beacon, false);
                 }
             });
 
             worldBeacons.forEach(beacon => {
                 if(!itemSelected){
-                    blueColor(beacon, false);
+                    pinkColor(beacon, false);
                 }
             })
 
@@ -697,26 +722,6 @@ const main  = () => {
 
     requestAnimationFrame(render);
     controls.update();
-
-    const redColor = (object, red) => {
-        let g = object.material.color.g;
-        let b = object.material.color.b;
-        if( g < 1 && !red){ g += 0.05 };
-        if( b < 1 && !red){ b += 0.05 };
-        if( g > 0 && red){ g -= 0.05 };
-        if( b > 0 && red){ b -= 0.05 };
-        object.material.color.setRGB(1, g, b);
-    }
-
-    const blueColor = (object, blue) => {
-        let r = object.material.color.r;
-        let g = object.material.color.g;
-        if( r < 1 && !blue){ r += 0.05 };
-        if( g < 1 && !blue){ g += 0.01 };
-        if( r > 0 && blue){ r -= 0.05 };
-        if( g > 0.5 && blue){ g -= 0.01 };
-        object.material.color.setRGB(r, g, 1);
-    }
 
     const pinkColor = (object, blue) => {
         let g = object.material.color.g;
@@ -790,7 +795,7 @@ beginBtn.addEventListener('click', () => {
     overlay.style.display = 'none';
     threeJsWindow.style.display = 'block';
     whispering.play();
-    whispering.volume = 0.2;
+    whispering.volume = 0.05;
     main();
 });
 
@@ -819,8 +824,7 @@ const checkForClick = () => {
 
 const playSound = (number) => {
     let no = parseInt(number);
-    audios.forEach(audio => { audio.pause(); })
-    audios[no].play();
+    loadedAudios[no].play();
 }
 
 const portfolios = [
@@ -841,6 +845,8 @@ const openWorld = (number) => {
     newCanvas.style.display = 'block';
     openWindow();
     secondary(loadedWorlds[number]);
+    worldSounds[number].play();
+
 }
 
 
@@ -862,11 +868,22 @@ function closeWindow() {
     iframe.classList.add('d-none');
     const newCanvas = popupWindow.querySelector('#d');
     newCanvas.style.display = 'none';
+    whispering.play();
+    loadedAudios.forEach(audio => {
+        audio.setVolume(1)
+    });
+    worldSounds.forEach(sound => {
+        sound.pause();
+    })
 }
 function openWindow(){
     popupWindow.style.opacity = 1;
     popupWindow.style.zIndex = 100;
     viewing = true;
+    whispering.pause();
+    loadedAudios.forEach(audio => {
+        audio.setVolume(0)
+    });
 }
 
 btnForwards.addEventListener('click', () => {
