@@ -385,7 +385,7 @@ const main  = () => {
         parent.add(light.target);
     }
 
-    addPointLight(0xFFFFFF, 0.8, scene, 5, 500, 100, 1000);
+    addPointLight(0xFFFFFF, 0.8, scene, 1, 500, 100, 1000);
 
     scene.add( new THREE.AmbientLight( 0xffffff, 0.5 ) );
 
@@ -828,9 +828,9 @@ const playSound = (number) => {
 }
 
 const portfolios = [
-    'https://issuu.com/mmakhotsolamola/docs/mmakhotso_lamola_portfolio_2020',
-    'https://issuu.com/mmakhotsolamola/docs/mmakhotso_lamola_portfolio_2020',
-    'https://issuu.com/mmakhotsolamola/docs/mmakhotso_lamola_portfolio_2020'
+    'https://drive.google.com/file/d/14Oh6MJ-kmLNmfF0H5RRSanfXb5XiiDrx/preview',
+    'https://drive.google.com/file/d/14Oh6MJ-kmLNmfF0H5RRSanfXb5XiiDrx/preview',
+    'https://drive.google.com/file/d/14Oh6MJ-kmLNmfF0H5RRSanfXb5XiiDrx/preview'
 ]
 const openPortfolio = (number) => {
     openWindow();
