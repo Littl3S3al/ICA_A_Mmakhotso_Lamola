@@ -17,7 +17,8 @@ const btnBack = document.querySelector('#backwards');
 let currentAngle = 0;
 let actualAngle = 0;
 
-const audios = document.querySelectorAll('audio');
+const audios = document.querySelectorAll('.audio');
+const whispering = document.querySelector('.audio-overall')
 
 let currentObject;
 
@@ -340,7 +341,7 @@ const main  = () => {
     // scene
     const scene = new THREE.Scene();
     scene.background = new THREE.Color( 0xAED6F1  );
-    scene.fog = new THREE.FogExp2( 0xAED6F1   , 0.004 );
+    scene.fog = new THREE.FogExp2( 0xAED6F1   , 0.003 );
 
     
 
@@ -412,17 +413,17 @@ const main  = () => {
         .setPath( 'assets/soundReflection/' )
         .load( [ 'px.png', 'nx.png', 'py.png', 'ny.png', 'pz.png', 'nz.png' ] );
                     
-    const reflectiveMaterial = new THREE.MeshBasicMaterial( { color: 'rgb(255,255,255)', envMap: reflectWorld} );
-
+    
     let soundBeacons = [];
 
     for ( var i = 0; i < 4; i ++ ) {
+        const reflectiveMaterial = new THREE.MeshBasicMaterial( { color: 'rgb(255,255,255)', envMap: reflectWorld} );
         let pos = [
             {x: -110, z: 50}, {x: 0, z: -280}, {x: 160, z: -50}, {x: -50, z: 250}
         ]
         var mesh = new THREE.Mesh( geometry, reflectiveMaterial );
         mesh.position.x = pos[i].x;
-        mesh.position.y = 2;
+        mesh.position.y = 0.5;
         mesh.position.z = pos[i].z;
         mesh.castShadow = true; //default is false
         mesh.receiveShadow = true;
@@ -440,17 +441,19 @@ const main  = () => {
         .setPath( 'assets/worldReflection/' )
         .load( [ 'px.png', 'px.png', 'px.png', 'px.png', 'px.png', 'px.png' ] );
                     
-    const waterMaterial = new THREE.MeshBasicMaterial( { color: 'rgb(255,255,255)', envMap: waterWorld, refractionRatio: 0.8} );
-    waterMaterial.envMap.mapping = THREE.CubeRefractionMapping;
+    
 
     for(var i = 0; i < 5; i ++){
+        const waterMaterial = new THREE.MeshBasicMaterial( { color: 'rgb(255,255,255)', envMap: waterWorld, refractionRatio: 0.8} );
+        waterMaterial.envMap.mapping = THREE.CubeRefractionMapping;
+
         let pos = [
             {x: -220, z: -30}, {x: -50, z: -150}, {x: 250, z: -20}, {x: 170, z: 50}, {x: 0, z: 180}
         ];
         var mesh = new THREE.Mesh( sphereGeometry, waterMaterial );
         mesh.position.x = pos[i].x;
         mesh.position.z = pos[i].z;
-        mesh.position.y = 10;
+        mesh.position.y = -4;
         mesh.castShadow = true;
         mesh.receiveShadow = true;
         mesh.name = 'worldBeacon' + i;
@@ -472,12 +475,7 @@ const main  = () => {
     var clothTexture = textureLoader.load( 'assets/pattern.png' );
     clothTexture.anisotropy = 16;
 
-    var clothMaterial = new THREE.MeshLambertMaterial( {
-        color: 'rgb(255, 255, 255)',
-        map: clothTexture,
-        side: THREE.DoubleSide,
-        alphaTest: 0.5
-    } );
+    
 
     // cloth geometry
 
@@ -486,6 +484,14 @@ const main  = () => {
     // cloth mesh
 
    for(var i = 0; i < 3; i ++){
+
+    var clothMaterial = new THREE.MeshLambertMaterial( {
+        color: 'rgb(255, 255, 255)',
+        map: clothTexture,
+        side: THREE.DoubleSide,
+        alphaTest: 0.5
+    } );
+
         let pos = [
             {x: -130, z: -40}, {x: 30, z: -170}, {x: 30, z: 280}
         ]
@@ -783,6 +789,8 @@ const main  = () => {
 beginBtn.addEventListener('click', () => {
     overlay.style.display = 'none';
     threeJsWindow.style.display = 'block';
+    whispering.play();
+    whispering.volume = 0.2;
     main();
 });
 
