@@ -34,6 +34,13 @@ body{
         z-index: 1;
     }
 
+    .buttons{
+        z-index: 2;
+        position: fixed;
+        bottom: 0;
+        right: 0;
+    }
+
 }
 
 #loading {

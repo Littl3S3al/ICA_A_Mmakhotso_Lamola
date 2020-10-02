@@ -32,6 +32,12 @@ body {
   height: 100vh;
   z-index: 1;
 }
+#three-js-container .buttons {
+  z-index: 2;
+  position: fixed;
+  bottom: 0;
+  right: 0;
+}
 
 #loading {
   color: white;

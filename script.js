@@ -12,6 +12,11 @@ const threeJsWindow = document.querySelector('#three-js-container');
 const popupWindow = document.querySelector('.popup-window');
 const closeBtn = document.querySelector('#btn-close');
 
+const btnForwards = document.querySelector('#forwards');
+const btnBack = document.querySelector('#backwards');
+let currentAngle = 0;
+let actualAngle = 0;
+
 const audios = document.querySelectorAll('audio');
 
 let currentObject;
@@ -41,7 +46,7 @@ let loadedWorlds = [];
 var DAMPING = 0.03;
 var DRAG = 1 - DAMPING;
 var MASS = 0.1;
-var restDistance = 5;
+var restDistance = 2;
 
 var xSegs = 10;
 var ySegs = 10;
@@ -219,7 +224,7 @@ function Cloth( w, h ) {
 
 function simulate( now ) {
 
-    var windStrength = Math.cos( now / 7000 ) * 10 ;
+    var windStrength = Math.cos( now / 7000 )  ;
 
     windForce.set( Math.sin( now / 2000 ), Math.cos( now / 3000 ), Math.sin( now / 1000 ) );
     windForce.normalize();
@@ -328,14 +333,14 @@ const main  = () => {
     // camera
     const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 1, 100000 );
     camera.position.x = 0;
-    camera.position.y = 0;
-    camera.position.z = 0;
+    camera.position.y = 130;
+    camera.position.z = 50;
 
 
     // scene
     const scene = new THREE.Scene();
-    scene.background = new THREE.Color( 0xffffff  );
-    scene.fog = new THREE.FogExp2( 0xffffff  , 0.007 );
+    scene.background = new THREE.Color( 0xAED6F1  );
+    scene.fog = new THREE.FogExp2( 0xAED6F1   , 0.004 );
 
     
 
@@ -366,7 +371,7 @@ const main  = () => {
 
     addPointLight(0xFFFFFF, 0.8, scene, 5, 500, 100, 1000);
 
-    scene.add( new THREE.AmbientLight( 0x666666 ) );
+    scene.add( new THREE.AmbientLight( 0xffffff, 0.5 ) );
 
 
 
@@ -377,10 +382,11 @@ const main  = () => {
     controls.enableDamping = true; // an animation loop is required when either damping or auto-rotation are enabled
     controls.dampingFactor = 0.05;
     controls.screenSpacePanning = false;
-    controls.minDistance = 50;
+    controls.minDistance = 20;
     controls.maxDistance = 200;
-    controls.maxPolarAngle = 90 * Math.PI/180;
-    controls.minPolarAngle = 90 * Math.PI/180;
+    controls.minPolarAngle = 0 * Math.PI/180;
+    controls.maxPolarAngle = 80 * Math.PI/180;
+    controls.enableKeys = false;
 
     
       
@@ -388,12 +394,12 @@ const main  = () => {
     // set up world
     const invisMaterial = new THREE.MeshPhongMaterial( { color: 0xffffff, flatShading: true, transparent: true, opacity: 0 } );
 
-    const geometry = new THREE.CylinderBufferGeometry( 0, 50, 50, 4, 1 );
+    const geometry = new THREE.CylinderBufferGeometry( 0, 10, 10, 3, 1 );
     
 
 
     const CenterOrb = new THREE.Mesh (geometry, invisMaterial)
-    CenterOrb.position.x = 300;
+    CenterOrb.position.x = 200;
     CenterOrb.position.y = 0;
     CenterOrb.position.z = 0;
     scene.add( CenterOrb );
@@ -412,11 +418,11 @@ const main  = () => {
 
     for ( var i = 0; i < 4; i ++ ) {
         let pos = [
-            {x: -200, z: -25}, {x: 250, z: -250}, {x: 200, z: 100}, {x: -250, z: 250}
+            {x: -110, z: 50}, {x: 0, z: -280}, {x: 160, z: -50}, {x: -50, z: 250}
         ]
         var mesh = new THREE.Mesh( geometry, reflectiveMaterial );
         mesh.position.x = pos[i].x;
-        mesh.position.y = 30;
+        mesh.position.y = 2;
         mesh.position.z = pos[i].z;
         mesh.castShadow = true; //default is false
         mesh.receiveShadow = true;
@@ -425,8 +431,11 @@ const main  = () => {
 
     }
 
+
+    // world beacons
+
     let worldBeacons = [];
-    const sphereGeometry = new THREE.SphereGeometry( 20, 32, 32 );
+    const sphereGeometry = new THREE.SphereGeometry( 6, 32, 32 );
     const waterWorld = cubeTextureLoader
         .setPath( 'assets/worldReflection/' )
         .load( [ 'px.png', 'px.png', 'px.png', 'px.png', 'px.png', 'px.png' ] );
@@ -436,12 +445,12 @@ const main  = () => {
 
     for(var i = 0; i < 5; i ++){
         let pos = [
-            {x: -250, z: -250}, {x: 150, z: -150}, {x: 250, z: 250}, {x: 10, z: 200}, {x: -170, z: 100}
+            {x: -220, z: -30}, {x: -50, z: -150}, {x: 250, z: -20}, {x: 170, z: 50}, {x: 0, z: 180}
         ];
         var mesh = new THREE.Mesh( sphereGeometry, waterMaterial );
         mesh.position.x = pos[i].x;
         mesh.position.z = pos[i].z;
-        mesh.position.y = 20;
+        mesh.position.y = 10;
         mesh.castShadow = true;
         mesh.receiveShadow = true;
         mesh.name = 'worldBeacon' + i;
@@ -454,7 +463,7 @@ const main  = () => {
     let portfolioBeacons = [];
 
     // cloth parent
-    var planeGeometry = new THREE.PlaneBufferGeometry( 50, 70);
+    var planeGeometry = new THREE.PlaneBufferGeometry( 20, 30);
     var planeMaterial = new THREE.MeshBasicMaterial( {color: 0xffff00, side: THREE.DoubleSide, transparent: true, opacity: 0});
 
     // cloth
@@ -478,11 +487,11 @@ const main  = () => {
 
    for(var i = 0; i < 3; i ++){
         let pos = [
-            {x: -150, z: -150}, {x: 250, z: -10}, {x: -50, z: 270}
+            {x: -130, z: -40}, {x: 30, z: -170}, {x: 30, z: 280}
         ]
 
         var plane = new THREE.Mesh( planeGeometry, planeMaterial );
-        plane.position.set( pos[i].x, 25, pos[i].z );
+        plane.position.set( pos[i].x, 5, pos[i].z );
         CenterOrb.add( plane );
         plane.name = 'portfolioBeacon' + i;
 
@@ -511,7 +520,7 @@ const main  = () => {
     groundTexture.wrapS = THREE.RepeatWrapping;
     groundTexture.wrapT = THREE.RepeatWrapping;
     groundTexture.magFilter = THREE.NearestFilter;
-    const repeats = groundSize / 100;
+    const repeats = groundSize / 200;
     groundTexture.repeat.set(repeats, repeats);
 
     const planeGeo = new THREE.PlaneBufferGeometry(groundSize, groundSize);
@@ -592,6 +601,12 @@ const main  = () => {
     const render = (time) => {
         currentObject = undefined;
 
+        let difference = actualAngle - currentAngle;
+        actualAngle -= difference/100;
+        CenterOrb.rotation.y = actualAngle;
+        
+
+
         if(!viewing){
             let itemSelected = false;
 
@@ -599,7 +614,7 @@ const main  = () => {
 
             window.addEventListener('resize', onWindowResize, false)
 
-            CenterOrb.rotation.y = time/2;
+           
 
 
             pickHelper.pick(pickPosition, scene, camera, time);
@@ -619,7 +634,7 @@ const main  = () => {
             }
 
             soundBeacons.forEach(beacon => {
-                beacon.rotation.y = -time*10;
+                beacon.rotation.y = -time;
                 if(!itemSelected){
                     redColor(beacon, false);
                 }
@@ -845,3 +860,16 @@ function openWindow(){
     popupWindow.style.zIndex = 100;
     viewing = true;
 }
+
+btnForwards.addEventListener('click', () => {
+    currentAngle += 90 * Math.PI/180;
+});
+btnBack.addEventListener('click', () => {
+    currentAngle -= 90 * Math.PI/180;
+});
+btnForwards.addEventListener('touchend', () => {
+    currentAngle += 90 * Math.PI/180;
+});
+btnBack.addEventListener('touchend', () => {
+    currentAngle -= 90 * Math.PI/180;
+});
