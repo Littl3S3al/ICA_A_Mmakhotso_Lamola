@@ -545,7 +545,7 @@ const main  = () => {
 
     // set up ground plane
 
-    const groundSize = 2500;
+    const groundSize = 1800;
     const groundTexture = textureLoader.load('assets/bluepring.jpg');
     groundTexture.magFilter = THREE.NearestFilter;
     groundTexture.wrapS = THREE.RepeatWrapping;
