@@ -365,7 +365,7 @@ const main  = () => {
    worldMaps.forEach(map => {
     const world = cubeTextureLoader
     .setPath( map )
-    .load( [ 'px.png', 'px.png', 'px.png', 'px.png', 'px.png', 'px.png' ] );
+    .load( [ 'px.png', 'nx.png', 'py.png', 'ny.png', 'pz.png', 'nz.png' ] );
     loadedWorlds.push(world);
    })
 
@@ -845,6 +845,7 @@ const openWorld = (number) => {
     newCanvas.style.display = 'block';
     openWindow();
     secondary(loadedWorlds[number]);
+    worldSounds[number].currentTime = 0;
     worldSounds[number].play();
 
 }
