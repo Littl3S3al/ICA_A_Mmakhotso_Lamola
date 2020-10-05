@@ -828,9 +828,9 @@ const playSound = (number) => {
 }
 
 const portfolios = [
-    'https://drive.google.com/file/d/14Oh6MJ-kmLNmfF0H5RRSanfXb5XiiDrx/preview',
-    'https://drive.google.com/file/d/14Oh6MJ-kmLNmfF0H5RRSanfXb5XiiDrx/preview',
-    'https://drive.google.com/file/d/14Oh6MJ-kmLNmfF0H5RRSanfXb5XiiDrx/preview'
+    'https://docs.google.com/presentation/d/e/2PACX-1vT32epgUpLD2RKQVbtn54p3izfAb-08I51MLZrQuO1zpAfvCaqv130OjWW2fnX22RZMSp7c_74bjR4S/embed?start=false&loop=false&delayms=3000',
+    'https://docs.google.com/presentation/d/e/2PACX-1vT32epgUpLD2RKQVbtn54p3izfAb-08I51MLZrQuO1zpAfvCaqv130OjWW2fnX22RZMSp7c_74bjR4S/embed?start=false&loop=false&delayms=3000',
+    'https://docs.google.com/presentation/d/e/2PACX-1vT32epgUpLD2RKQVbtn54p3izfAb-08I51MLZrQuO1zpAfvCaqv130OjWW2fnX22RZMSp7c_74bjR4S/embed?start=false&loop=false&delayms=3000'
 ]
 const openPortfolio = (number) => {
     openWindow();
